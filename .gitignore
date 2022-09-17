@@ -1,0 +1,7 @@
+
+
+flask_auth_venv/
+
+*.pyc
+project/__pycache__
+
