@@ -9,6 +9,8 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     name = db.Column(db.String(1000))
     docs=db.relationship('Document', backref='user')
+    #treat the docs as list on a User instance u:
+    #u.docs.append(doc1)
     
 
 # class Docs(db.Model):
@@ -26,6 +28,7 @@ class Document(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     #use the id of the user as a foreign key on each document
     userId=db.Column(db.Integer, db.ForeignKey('user.id'))
+    documentName=db.Column(db.String(32))
     jsonFile=db.Column(db.JSON)
 
 
