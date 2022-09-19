@@ -6,4 +6,38 @@
 <h1 class="title">
   Welcome, {{ name }}!
 </h1>
+<div class="content">
+  {% if docs|length <1 %}
+ 
+  <h3>Create a new did below</h3>
+  {%else%}
+
+  <table>
+    <tr>
+      <th>Document</th>
+      <th>Actions</th>
+  </tr>
+  {% for doc in docs %}
+      <tr>
+          <td>{{doc.documentName}}</td>
+          <td>
+              
+              <br>
+          </td>
+      </tr>
+  {%endfor%}
+</table>
+  
+  {%endif%}
+
+
+</div>
+
+<div class="form">
+  <form action="/profile" method="POST">
+      <input type="text" name="documentName" id="documentName" placeholder="Document name">
+      <input type="submit" value="Create did">
+  </form>
+</div>
+
 {% endblock %}
