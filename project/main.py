@@ -1,5 +1,6 @@
 # main.py
 
+import re
 from flask import Blueprint, render_template, request, redirect
 from flask_login import login_required, current_user
 from project.models import User,Document
@@ -38,4 +39,14 @@ def profile_post():
     except:
         "Problem with saving document", 404
 
-    
+@main.route('/delete/<int:id>')
+@login_required
+def delete(id):
+    docToDelete=Document.query.get_or_404(id)
+
+    try:
+        db.session.delete(docToDelete)
+        db.session.commit()
+        return redirect('/profile')
+    except:
+        return "Problem with deleting"
