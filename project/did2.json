@@ -35,7 +35,7 @@
           "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
           "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4"
         }
-      },
+      }
     ],
     "authentication": [
       "did:web:example.com#key-0",
