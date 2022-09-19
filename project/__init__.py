@@ -3,9 +3,16 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager 
+import json
 
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
+
+
+def to_pretty_json(value):
+    return json.dumps(value,sort_keys=False,
+    indent=3,separators=(',',':'))
+
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +25,7 @@ def create_app():
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
+    app.jinja_env.filters['pretty_json']=to_pretty_json
 
     from .models import User
 

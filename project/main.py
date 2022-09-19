@@ -50,3 +50,10 @@ def delete(id):
         return redirect('/profile')
     except:
         return "Problem with deleting"
+
+@main.route('/<owner>/<documentName>/did.json')
+def show_did(owner,documentName):
+    user=User.query.filter_by(name=owner).first()
+    document=Document.query.filter_by(documentName=documentName).first()
+    return render_template('show_did.html',did=document.jsonFile)
+    
