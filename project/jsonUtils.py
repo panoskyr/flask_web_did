@@ -195,6 +195,12 @@ class clsId:
         }
         return to_return
 
+    def __repr__(self):
+        return self.__str__
+
+    def __str__(self) -> str:
+        return json.dumps(self.to_json())
+
 
 
 class DID:
@@ -256,4 +262,4 @@ dict4={
   }
 
 did=DID.from_json(dict4)
-print(did.id)
+print(did.verificationMethod)
