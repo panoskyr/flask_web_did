@@ -68,13 +68,19 @@ class clsPublicKeyJwk:
         }.items()
 
     def __str__(self):
-        return json.dumps(dict(self),ensure_ascii=False)
+        return json.dumps(dict(self))
 
     def __repr__(self):
         return self.__str__()
 
+    #if we return self.__str__ we get white space
     def to_json(self):
-        return self.__str__()
+        to_return={
+            "kty":self.kty,
+            "crv":self.crv,
+            "x":self.x
+        }
+        return to_return
 
     @staticmethod
     #a function that takes a dictionary and returns 
@@ -89,7 +95,9 @@ class clsPublicKeyJwk:
 class clsVerificationMethodCollection:
     def __init__(self, verificationMethods):
         #a list of verification methods passed as parameter
-        self.verificationMethods=verificationMethods
+        self.verificationMethods=[]
+        for vm in verificationMethods:
+            self.verificationMethods.append(clsVerificationMethod.from_json(vm))
 
     def __str__(self):
         return json.dumps(self.to_json())
@@ -131,8 +139,88 @@ class clsVerificationMethodCollection:
 
         print("no such verification method exists!")
         
+class clsContext:
+    #takes a list of contexts strings
+    def __init__(self,contexts):
+        self.contexts=contexts
 
-jsondict={"verificationMethod": [
+    def addContext(self,contextString):
+        self.contexts.append(contextString)
+        print("Context added sucessfully!")
+
+    def removeContext(self,contextString):
+        if contextString in self.contexts:
+            self.contexts.remove(contextString)
+            print("Successfully removed a context")
+        else:
+            print("No such context exists!")
+
+    def to_json(self):
+        li=[]
+        for item in self.contexts:
+            li.append(item)
+        to_return={"@context":li}
+        return to_return
+
+    @staticmethod
+    def from_json(jsonDict):
+        if "@context" in jsonDict.keys():
+            return(clsContext(jsonDict["@context"]))
+
+    def __str__(self):
+        return json.dumps(self.to_json())
+
+    def __repr__(self):
+        return self.__str__()
+
+    def to_json(self):
+        to_return={"@context":self.contexts}
+        return to_return
+
+class clsId:
+    def __init__(self,id):
+        self.id=id
+
+    def changeId(self,newId:str):
+        self.id=newId
+        print("succesfully changed the id!")
+
+    @staticmethod
+    def from_json(jsonDict):
+        return clsId(jsonDict["id"])
+
+    def to_json(self):
+        to_return={
+            "id":self.id,
+        }
+        return to_return
+
+
+
+class DID:
+    def __init__(self,context,id,verificationMethod):
+        self.context=context
+        self.id=id
+        self.verificationMethod=verificationMethod
+
+    @staticmethod
+    def from_json(jsonDict):
+        if("@context") in jsonDict.keys():
+            context=clsContext(jsonDict["@context"])
+        if ("verificationMethod") in jsonDict.keys():
+            verificationMethod=clsVerificationMethodCollection(jsonDict["verificationMethod"])
+        if ("id") in jsonDict.keys():
+            id=clsId(jsonDict["id"])
+        return DID(context,id,verificationMethod)
+
+
+dict4={
+    "@context": [
+      "https://www.w3.org/ns/did/v1",
+      "https://w3id.org/security/suites/jws-2020/v1"
+    ],
+    "id": "did:web:example.com",
+    "verificationMethod": [
       {
         "id": "did:web:example.com#key-0",
         "type": "JsonWebKey2020",
@@ -165,24 +253,7 @@ jsondict={"verificationMethod": [
         }
       }
     ]
+  }
 
-}
-
-jsond2={
-        "id": "did:web:example.com#key-2",
-        "type": "JsonWebKey2020",
-        "controller": "did:web:example.com",
-        "publicKeyJwk": {
-          "kty": "EC",
-          "crv": "P-256",
-          "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-          "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4"
-        }
-}
-
-
-o=clsVerificationMethodCollection.from_json(jsondict)
-verObj=clsVerificationMethod.from_json(jsond2)
-o.addVerMethod(verObj)
-o.removeVerMethod("did:web:example.com#key-0")
-print(o.to_json())
+did=DID.from_json(dict4)
+print(did.id)
