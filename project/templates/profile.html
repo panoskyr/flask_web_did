@@ -24,6 +24,9 @@
               <a href="/delete/{{doc.id}}">Delete</a>
               <br>
               <a href="/{{doc.user.name}}/{{doc.documentName}}/did.json">See the document</a>
+              <br>
+              <a href="/modify/{{doc.id}}">Modify</a>
+          
           </td>
       </tr>
   {%endfor%}
@@ -34,11 +37,38 @@
 
 </div>
 
-<div class="form">
+<!-- <div class="form">
   <form action="/profile" method="POST">
       <input type="text" name="documentName" id="documentName" placeholder="Document name">
       <input type="submit" value="Create did">
   </form>
+</div> -->
+
+<div class="form">
+  <form action="/profile" method="POST">
+<div class="field">
+  <label class="label">Document Name</label>
+  <div class="control">
+    <input id="documentName" name="documentName" class="input" type="text" placeholder="Document Name">
+  </div>
 </div>
+
+  <div class="field">
+    <label class="label">Public Key</label>
+    <div class="control">
+      <input id="publicKey" name="publicKey" class="input" type="text"  placeholder="Place the public key here">
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button class="button is-link">Create did</button>
+    </div>
+  </div>
+  
+</form>
+
+</div>
+
 
 {% endblock %}
