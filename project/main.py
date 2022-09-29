@@ -1,5 +1,5 @@
 # main.py
-
+import copy
 import re
 from flask import Blueprint, render_template, request, redirect
 from flask_login import login_required, current_user
@@ -7,6 +7,7 @@ from project.models import User,Document
 import json
 from . import db
 from project import didDoc
+from sqlalchemy.orm.attributes import flag_modified
 
 main = Blueprint('main', __name__)
 
@@ -90,27 +91,52 @@ def modify(id):
 @login_required
 def modify_post(id):
     document=Document.query.get_or_404(id)
-    newkey=request.form["publicKey"]
-    print("the new key is:{}".format(newkey))
-    #document.jsonFile is a dict
-    did=document.jsonFile
-    keyNumber=len(did["verificationMethod"])+1
-    newVerMethod={
-        "id":did["id"]+"#key-"+str(keyNumber),
+    #for the json file to change we need to get to top level domain
+    #get the old verificationmethod list
+    oldVerificationMethod=document.jsonFile["verificationMethod"]
+    print("the old verificationMethod is {}".format(oldVerificationMethod))
+    numberOfKeys=len(document.jsonFile["verificationMethod"])
+    keyId=document.jsonFile["id"]+"#key"+str(numberOfKeys)
+    controller=document.jsonFile["id"]
+    #use json to not double encode the string
+    newKey=json.loads(request.form["publicKey"])
+    newKeyDict={
+        "id":keyId,
         "type":"JsonWebKey2020",
-        "controller":did["id"],
-        "publicKeyJwk":newkey
+        "controller":controller,
+        "publicKeyJwk":newKey
     }
-    did["verificationMethod"].append(newVerMethod)
-    #the did object has added the new key
-    document.jsonFile=did
-    print(document.jsonFile)
-    #the document.jsonFile IS changed
+    oldVerificationMethod.append(newKeyDict)
+    document.jsonFile["verificationMethod"]=oldVerificationMethod
+    print("added ver method")
+
     try:
+        #signal to the db that we have modified the jsonfile
+        flag_modified(document, "jsonFile")
         db.session.commit()
-        d=Document.query.get_or_404(id)
-        print(d.jsonFile["verificationMethod"][-1])
+        return redirect("/profile")
     except:
-        return "Could not modify file"
-    #redirect to modify GET
+        return "no change"
     return redirect(request.url)
+    # newkey=request.form["publicKey"]
+    # print("the new key is:{}".format(newkey))
+    # #document.jsonFile is a dict
+
+    # keyNumber=len(document.jsonFile["verificationMethod"])+1
+    # newVerMethod={
+    #     "id":document.jsonFile["id"]+"#key-"+str(keyNumber),
+    #     "type":"JsonWebKey2020",
+    #     "controller":document.jsonFile["id"],
+    #     "publicKeyJwk":newkey
+    # }
+    # document.jsonFile["verificationMethod"].append(newVerMethod)
+    # #the did object has added the new key
+    # print(document.jsonFile)
+    # #the document.jsonFile IS changed
+    # try:
+    #     db.session.commit()
+    #     return redirect(request.url)
+    # except:
+    #     return "Could not modify file"
+    # #redirect to modify GET
+    

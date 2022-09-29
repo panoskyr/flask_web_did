@@ -1,6 +1,7 @@
 #a python class to use with json documents
 
 import json
+from multiprocessing import context
 
 
 class clsVerificationMethod:
@@ -155,12 +156,10 @@ class clsContext:
         else:
             print("No such context exists!")
 
-    def to_json(self):
-        li=[]
-        for item in self.contexts:
-            li.append(item)
-        to_return={"@context":li}
-        return to_return
+    def __iter__(self):
+        yield from{
+            "@context":self.contexts
+        }.items()
 
     @staticmethod
     def from_json(jsonDict):
@@ -168,14 +167,13 @@ class clsContext:
             return(clsContext(jsonDict["@context"]))
 
     def __str__(self):
-        return json.dumps(self.to_json())
+        return json.dumps(dict(self))
 
     def __repr__(self):
         return self.__str__()
 
-    def to_json(self):
-        to_return={"@context":self.contexts}
-        return to_return
+    def to_json(self):  
+        return self.__str__()
 
 class clsId:
     def __init__(self,id):
@@ -184,6 +182,12 @@ class clsId:
     def changeId(self,newId:str):
         self.id=newId
         print("succesfully changed the id!")
+
+    def __repr__(self):
+            return self.__str__()
+
+    def __str__(self):
+        return json.dumps(self.to_json())
 
     @staticmethod
     def from_json(jsonDict):
@@ -195,11 +199,7 @@ class clsId:
         }
         return to_return
 
-    def __repr__(self):
-        return self.__str__
 
-    def __str__(self) -> str:
-        return json.dumps(self.to_json())
 
 
 
@@ -208,6 +208,19 @@ class DID:
         self.context=context
         self.id=id
         self.verificationMethod=verificationMethod
+
+    def __str__(self):
+        return json.dumps(dict(self))
+
+    def __repr__(self):
+            return self.__str__()
+
+    def __iter__(self):
+        yield from {
+            "@context":self.context,
+            "id":self.id,
+            "verificationMethod":self.verificationMethod,
+        }.items()
 
     @staticmethod
     def from_json(jsonDict):
@@ -218,6 +231,14 @@ class DID:
         if ("id") in jsonDict.keys():
             id=clsId(jsonDict["id"])
         return DID(context,id,verificationMethod)
+
+    def to_json(self):
+        to_return={
+            self.id,
+            self.verificationMethod
+        }
+        return to_return
+
 
 
 dict4={
@@ -260,6 +281,5 @@ dict4={
       }
     ]
   }
-
-did=DID.from_json(dict4)
-print(did.verificationMethod)
+    
+dict4["verificationMethod"]
