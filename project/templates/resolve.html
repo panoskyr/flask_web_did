@@ -1,0 +1,75 @@
+<!--templates/resolve.html-->
+
+{%extends "base.html" %}
+
+<div class="title">
+    Result
+</div>
+{%block content%}
+<div class="block">
+<div class="columns is-vcentered">
+
+<div class="column is-three-quarters">
+
+
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th class="has-text-centered">did</th>
+            <th class="has-text-centered"> method</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+        <tr>
+            <td class="has-text-centered">{{jsonDict["id"]}}</td>
+            <td class="has-text-centered">web</td>
+            
+        </tr>
+
+
+    </tbody>
+
+
+
+</table>
+</div>
+
+<div class="column-is-one-quarter">
+    <figure class="image is-128x128">
+        <img src="https://bulma.io/images/placeholders/128x128.png">
+      </figure>
+
+</div>
+
+
+
+</div>
+</div>
+
+<h1>Verification Methods</h1>
+<table class="table is-fullwidth">
+
+
+<tbody>
+{%for verificationMethod in jsonDict["verificationMethod"]%}
+
+<tr>
+    <td><b>{{verificationMethod["type"]}}</b></td>
+    <td>{{verificationMethod["id"]}}</td>
+    <td>{{verificationMethod["publicKeyJwk"]|pretty_json|safe}}</td>
+</tr>
+
+{%endfor%}
+
+
+</tbody>
+
+
+
+</table>
+
+
+
+{%endblock%}
