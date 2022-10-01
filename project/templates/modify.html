@@ -27,8 +27,19 @@
           
             <div class="field is-grouped">
               <div class="control">
-                <button class="button is-link">Add verification Method</button>
+                <button name="addKey"class="button is-link">Add verification Method</button>
               </div>
+            </div>
+
+            <div class="field">
+              <label class="label">Remove a public key</label>
+              <div class="control">
+                <input id="keyToDelete" name="keyToDelete" class="input" placeolder="Place the id of the key you want to delete" type="text">
+              </div>
+            </div>
+
+            <div class="control">
+              <button name="deleteKey" class="button is-link">Delete the key</button>
             </div>
             
           </form>

@@ -90,33 +90,55 @@ def modify(id):
 @main.route('/modify/<int:id>',methods=["POST"])
 @login_required
 def modify_post(id):
-    document=Document.query.get_or_404(id)
-    #for the json file to change we need to get to top level domain
-    #get the old verificationmethod list
-    oldVerificationMethod=document.jsonFile["verificationMethod"]
-    print("the old verificationMethod is {}".format(oldVerificationMethod))
-    numberOfKeys=len(document.jsonFile["verificationMethod"])
-    keyId=document.jsonFile["id"]+"#key"+str(numberOfKeys)
-    controller=document.jsonFile["id"]
-    #use json to not double encode the string
-    newKey=json.loads(request.form["publicKey"])
-    newKeyDict={
-        "id":keyId,
-        "type":"JsonWebKey2020",
-        "controller":controller,
-        "publicKeyJwk":newKey
-    }
-    oldVerificationMethod.append(newKeyDict)
-    document.jsonFile["verificationMethod"]=oldVerificationMethod
-    print("added ver method")
+    if 'addKey' in request.form:
+        document=Document.query.get_or_404(id)
+        #for the json file to change we need to get to top level domain
+        #get the old verificationmethod list
+        oldVerificationMethod=document.jsonFile["verificationMethod"]
+        #print("the old verificationMethod is {}".format(oldVerificationMethod))
+        numberOfKeys=len(document.jsonFile["verificationMethod"])
+        keyId=document.jsonFile["id"]+"#key"+str(numberOfKeys)
+        controller=document.jsonFile["id"]
+        #use json to not double encode the string
+        newKey=json.loads(request.form["publicKey"])
+        newKeyDict={
+            "id":keyId,
+            "type":"JsonWebKey2020",
+            "controller":controller,
+            "publicKeyJwk":newKey
+        }
+        oldVerificationMethod.append(newKeyDict)
+        document.jsonFile["verificationMethod"]=oldVerificationMethod
+        print("added ver method")
 
-    try:
-        #signal to the db that we have modified the jsonfile
-        flag_modified(document, "jsonFile")
-        db.session.commit()
+        try:
+            #signal to the db that we have modified the jsonfile
+            flag_modified(document, "jsonFile")
+            db.session.commit()
+            return redirect("/profile")
+        except:
+            return "no change"
+    elif 'deleteKey' in request.form:
+        document=Document.query.get_or_404(id)
+        #get the id of the key without the ""
+        keyToDelete=request.form["keyToDelete"]
+        print("Key to delete is {}".format(keyToDelete))
+        for keyDict in document.jsonFile["verificationMethod"]:
+            print(keyDict)
+            if keyDict["id"]==keyToDelete:
+                print("!!found the key to delete in verificationMethod")
+                document.jsonFile["verificationMethod"].remove(keyDict)
+                try:
+                    flag_modified(document,"jsonFile")
+                    db.session.commit()
+                    return redirect("/profile")
+                except:
+                    "Could not commit to db"
+
         return redirect("/profile")
-    except:
-        return "no change"
+
+
+
     return redirect(request.url)
     # newkey=request.form["publicKey"]
     # print("the new key is:{}".format(newkey))
