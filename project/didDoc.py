@@ -15,12 +15,17 @@ class DID:
         elif "verificationMethod" not in dict.keys():
             self.verificationMethod=[]
 
+        if "authentication" in dict.keys():
+              self.authentication=dict["authentication"]
+        elif "authentication" not in dict.keys():
+              self.authentication=[]
     #returns a json string of the did document
     def to_json(self):
         to_return={
             "@context":self.context,
             "id":self.id,
-            "verificationMethod":self.verificationMethod
+            "verificationMethod":self.verificationMethod,
+            "authentication":self.authentication
         }
         return to_return
 

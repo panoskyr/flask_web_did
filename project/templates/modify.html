@@ -13,7 +13,7 @@
         
         </div>
     </div>
-    <div class="column">
+    <div class="column is-half">
         <div class="form">
             <form action={{url_for('main.modify_post',id=did.id)}} method="POST">
 
@@ -34,12 +34,38 @@
             <div class="field">
               <label class="label">Remove a public key</label>
               <div class="control">
-                <input id="keyToDelete" name="keyToDelete" class="input" placeolder="Place the id of the key you want to delete" type="text">
+                <input id="keyToDelete" name="keyToDelete" class="input"  type="text" placeolder="Place the id of the key you want to delete (include quotation marks)" >
               </div>
             </div>
 
             <div class="control">
               <button name="deleteKey" class="button is-link">Delete the key</button>
+            </div>
+
+
+
+            <div class="field">
+              <label class="label">Add Authentication Method</label>
+              <div class="control">
+                <input id="authToAdd" name="authToAdd" class="input" type="text"  placeholder="Place the verificationMethod id here (include quotation marks)">
+              </div>
+            </div>
+          
+            <div class="field is-grouped">
+              <div class="control">
+                <button name="addAuth" class="button is-link">Add authentication Method</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label">Remove authentication Method </label>
+              <div class="control">
+                <input id="authToDelete" name="authToDelete" class="input" placeolder="Place the id of the authentication you want to delete (include quotation marks)" type="text">
+              </div>
+            </div>
+
+            <div class="control">
+              <button name="deleteAuth" class="button is-link">Delete authentication</button>
             </div>
             
           </form>

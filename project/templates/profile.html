@@ -62,9 +62,30 @@
 
   <div class="field is-grouped">
     <div class="control">
-      <button class="button is-link">Create did</button>
+      <button name="addDocument" class="button is-link">Create did</button>
     </div>
   </div>
+  
+</form>
+
+<!--Resolve a did document-->
+<!--GET request to resolveDid route with the placed did as the input data-->
+
+<div class="form">
+  <form action={{url_for('main.resolveDid')}} method="GET">
+
+    <div class="field">
+      <label class="label">Resolve a DID</label>
+      <div class="control">
+        <input id="didToResolve" name="didToResolve" class="input" type="text"  placeholder="Place the DID here">
+      </div>
+    </div>
+  
+    <div class="field is-grouped">
+      <div class="control">
+        <button name="resolveDid"class="button is-link">Resolve the DID</button>
+      </div>
+    </div>
   
 </form>
 

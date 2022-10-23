@@ -1,12 +1,12 @@
 # main.py
 import copy
 import re
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, render_template, request, redirect,url_for
 from flask_login import login_required, current_user
 from project.models import User,Document
 import json
 from . import db
-from project import didDoc
+from project import didDoc, didToUrl
 from sqlalchemy.orm.attributes import flag_modified
 
 main = Blueprint('main', __name__)
@@ -49,7 +49,7 @@ def profile_post():
     did=didDoc.DID(didDict)
     did.id=convert(url)
     did.verificationMethod[0]["publicKeyJwk"]=publicKey
-    did.verificationMethod[0]["id"]=did.id+"#key-"+str(len(did.verificationMethod)+1)
+    did.verificationMethod[0]["id"]=did.id+"#key-"+str(len(did.verificationMethod)-1)
     did.verificationMethod[0]["controller"]=did.id
     newDocument=Document(documentName=documentName,jsonFile=did.to_json())
     current_user.docs.append(newDocument)
@@ -61,6 +61,14 @@ def profile_post():
     except:
         "Problem with saving document", 404
 
+@main.route('/resolve',methods=["GET"])
+@login_required
+def resolveDid():
+    did=request.args.get('didToResolve')
+    print("The did to resolve is: {}".format(did))
+    url=didToUrl.convert_to_url(did)
+    jsonDict=didToUrl.extract_json(url)
+    return render_template("resolve.html",imgUrl=url,jsonDict=jsonDict)
 @main.route('/delete/<int:id>')
 @login_required
 def delete(id):
@@ -76,7 +84,7 @@ def delete(id):
 @main.route('/<owner>/<documentName>/did.json')
 def show_did(owner,documentName):
     user=User.query.filter_by(name=owner).first()
-    document=Document.query.filter_by(documentName=documentName).first()
+    document=Document.query.filter_by(documentName=documentName,userId=user.id).first()
     return render_template('show_did.html',did=document.jsonFile)
     
 @main.route('/modify/<int:id>')
@@ -97,7 +105,7 @@ def modify_post(id):
         oldVerificationMethod=document.jsonFile["verificationMethod"]
         #print("the old verificationMethod is {}".format(oldVerificationMethod))
         numberOfKeys=len(document.jsonFile["verificationMethod"])
-        keyId=document.jsonFile["id"]+"#key"+str(numberOfKeys)
+        keyId=document.jsonFile["id"]+"#key-"+str(numberOfKeys)
         controller=document.jsonFile["id"]
         #use json to not double encode the string
         newKey=json.loads(request.form["publicKey"])
@@ -121,10 +129,9 @@ def modify_post(id):
     elif 'deleteKey' in request.form:
         document=Document.query.get_or_404(id)
         #get the id of the key without the ""
-        keyToDelete=request.form["keyToDelete"]
+        keyToDelete=json.loads(request.form["keyToDelete"])
         print("Key to delete is {}".format(keyToDelete))
         for keyDict in document.jsonFile["verificationMethod"]:
-            print(keyDict)
             if keyDict["id"]==keyToDelete:
                 print("!!found the key to delete in verificationMethod")
                 document.jsonFile["verificationMethod"].remove(keyDict)
@@ -134,6 +141,34 @@ def modify_post(id):
                     return redirect("/profile")
                 except:
                     "Could not commit to db"
+    elif 'addAuth' in request.form:
+        document=Document.query.get_or_404(id)
+        authToAdd=json.loads(request.form["authToAdd"])
+        oldAuthentication=document.jsonFile["authentication"]
+        oldAuthentication.append(authToAdd)
+        try:
+            flag_modified(document,"jsonFile")
+            db.session.commit()
+            return redirect("/profile")
+        except:
+            "Could not commit to db"
+    elif 'deleteAuth' in request.form:
+        document=Document.query.get_or_404(id)
+        authToDelete=json.loads(request.form["authToDelete"])
+        print(authToDelete)
+        for item in document.jsonFile["authentication"]:
+            print(item)
+            if item==authToDelete:
+                document.jsonFile["authentication"].remove(item)
+                try:
+                    flag_modified(document,"jsonFile")
+                    db.session.commit()
+                    return redirect("/profile")
+                except:
+                    "Could not commit to db."
+
+
+
 
         return redirect("/profile")
 
