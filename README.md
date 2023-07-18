@@ -1,5 +1,6 @@
 # flask_web_did
-A did:web method wallet implementation in Python
+A did:web method wallet implementation in Python. It is accompanied by a paper on DIDs and a report used for academic purposes.
+
 
 # Video presentation
 
